@@ -1,20 +1,21 @@
-# CRM agent integration
+# CRM and Hermes integration
 
-This CRM is the curated business workspace. `contact_messages` is a separate,
-immutable inbox. Agents may read inbox records, but must not treat them as CRM
-clients until a change proposal is reviewed.
+Use [Hermes setup](hermes.md) to choose the integration mode and configure a worker.
+The app stores inquiries, clients, deals, analyses, runs and proposals. It does not
+invoke an AI model or install a schedule.
 
-## Standard workflow
+- [Human user guide](../user-guide.md)
+- [Hermes setup and acceptance checklist](hermes.md)
+- [Authentication, write policy and implementation limits](agent-integration.md)
+- [Local script workflow and JSON payloads](../../scripts/crm-analyst/README.md)
+- [Analysis payload conventions](analysis-schemas.md)
+- [HTTP OpenAPI reference](openapi.yaml)
+- [Current verification coverage](verification.md)
 
-API base path: `/api/crm/v1`. Authenticate trusted agents with
-`Authorization: Bearer $CRM_AGENT_API_TOKEN`.
+HTTP base: `/api/crm/v1` (rewritten to `/api/crm`). Authenticate with an admin
+cookie or `Authorization: Bearer <CRM_AGENT_API_TOKEN>`. The token is optional for
+the app but required for HTTP workers without a browser session.
 
-1. Create a run with `POST /api/crm/v1/agent-runs`.
-2. Read client context from `GET /api/crm/context/clients/{id}`.
-3. Perform one bounded task: contact cleanup, needs, market, or pricing analysis.
-4. Create an analysis or a change proposal.
-5. Record evidence, confidence, model, prompt version and source references.
-6. Mark the run completed. Never overwrite an approved analysis.
-
-See [agent-integration.md](./agent-integration.md), [analysis-schemas.md](./analysis-schemas.md)
-and [openapi.yaml](./openapi.yaml).
+Local Hermes scripts instead connect directly to `DATABASE_URL`. They create
+unqualified leads and analyses awaiting review, without using change proposals.
+The two modes have different access boundaries; follow the guide for your mode.

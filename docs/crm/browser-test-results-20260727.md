@@ -1,5 +1,8 @@
 # CRM Browser E2E Results — 2026-07-27
 
+> Historical results inherited from the previous project. These are not a fresh
+> verification of this repository. See [current coverage](verification.md).
+
 Plan: `docs/crm/browser-test-plan.md`
 
 Run identifier: `E2E_BROWSER_20260727_220000`

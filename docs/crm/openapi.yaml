@@ -1,59 +1,1385 @@
 openapi: 3.1.0
 info:
-  title: CRM Agent API
-  version: 1.0.0
+  title: Gary Vibe Code CRM API
+  version: 1.1.0
+  description: Current route contract. Trusted Bearer tokens and admin sessions have broad CRM access;
+    there are no per-agent scopes. Input conventions are documented but validation/error shapes are not
+    uniform. No raw inquiry endpoint, model invocation or scheduler is included. See hermes.md and agent-integration.md.
 servers:
-  - url: /api/crm/v1
+- url: /api/crm/v1
+  description: Versioned rewrite
+- url: /api/crm
+  description: Direct route prefix
+security:
+- AgentToken: []
+- AdminSession: []
 paths:
+  /clients:
+    get:
+      summary: List or search clients
+      operationId: get_clients
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clients:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  total:
+                    type: integer
+                  hasMore:
+                    type: boolean
+        '401':
+          description: Authentication required
+      parameters:
+      - name: q
+        in: query
+        schema:
+          type: string
+        description: Client search text
+      - name: fields
+        in: query
+        schema:
+          type: string
+          enum:
+          - options
+        description: Use options for an id/name-only list. Response then contains clients only.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Result limit; defaults to 50, capped at 200. Send a positive integer.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Zero-based offset; defaults to 0.
+    post:
+      summary: Create a client and optional primary contact
+      operationId: post_clients
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '400':
+          description: Invalid input
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+  /clients/{id}:
+    get:
+      summary: Get client detail and related records
+      operationId: get_clients_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client:
+                    type: object
+                    additionalProperties: true
+                  contacts:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  deals:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  activities:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  analyses:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  activityTotal:
+                    type: integer
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    patch:
+      summary: Update a client
+      operationId: patch_clients_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
+      description: When nextActionAt is omitted, the current implementation clears it; send its existing
+        value when preserving that date.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientPatch'
+    delete:
+      summary: Archive a client
+      operationId: delete_clients_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
+      description: Sets archived status and archivedAt; does not delete the row.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+  /clients/{id}/contacts:
+    get:
+      summary: List client contacts
+      operationId: get_clients_id_contacts
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          description: Authentication required
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    post:
+      summary: Create a contact
+      operationId: post_clients_id_contacts
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '400':
+          description: Invalid input
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactInput'
+  /contacts/{id}:
+    patch:
+      summary: Update a contact
+      operationId: patch_contacts_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactPatch'
+    delete:
+      summary: Permanently delete a contact
+      operationId: delete_contacts_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+  /deals:
+    get:
+      summary: List deals
+      operationId: get_deals
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deals:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          description: Authentication required
+    post:
+      summary: Create a deal
+      operationId: post_deals
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deal:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '400':
+          description: Invalid input
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DealInput'
+  /deals/{id}:
+    patch:
+      summary: Update a deal or its stage
+      operationId: patch_deals_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DealPatch'
+    delete:
+      summary: Permanently delete a deal
+      operationId: delete_deals_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+  /activities:
+    post:
+      summary: Create a client activity
+      operationId: post_activities
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  activity:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '400':
+          description: Invalid input
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityInput'
+  /activities/{id}:
+    patch:
+      summary: Update, complete or reopen an activity
+      operationId: patch_activities_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
+      description: completed=true sets completedAt; false reopens it. dueAt is converted from a nonempty
+        date string.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityPatch'
+    delete:
+      summary: Permanently delete an activity
+      operationId: delete_activities_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+  /analyses:
+    get:
+      summary: List analyses
+      operationId: get_analyses
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  analyses:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  total:
+                    type: integer
+                  hasMore:
+                    type: boolean
+        '401':
+          description: Authentication required
+      parameters:
+      - name: status
+        in: query
+        schema:
+          type: string
+        description: Filter by analysis status
+      - name: type
+        in: query
+        schema:
+          type: string
+        description: Filter by needs, market or pricing
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Result limit; defaults to 50, capped at 200. Send a positive integer.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Zero-based offset; defaults to 0.
+    post:
+      summary: Create an analysis
+      operationId: post_analyses
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  analysis:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '400':
+          description: Invalid input
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalysisInput'
+    put:
+      summary: Legacy agent-run creation
+      operationId: put_analyses
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '400':
+          description: Invalid input
+      description: Legacy alias with extra optional fields supported by implementation. Prefer POST /agent-runs
+        for idempotent replay; this endpoint does not return an existing run on duplicate keys.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunInput'
+      deprecated: true
+  /analyses/{id}:
+    get:
+      summary: Get one analysis
+      operationId: get_analyses_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    patch:
+      summary: Edit, review or version an analysis
+      operationId: patch_analyses_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+                  effects:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '400':
+          description: Invalid input
+        '404':
+          description: Resource not found
+        '409':
+          description: Conflict or already reviewed/approved
+        '201':
+          description: New draft version created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+      description: Approval invokes pipeline effects. effects appears only when approval effects run.
+        createVersion returns 201 with data. Do not combine edits to pricing findings and approval in
+        one request; save edits first, then approve, because effects use the pre-update analysis.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalysisPatch'
   /agent-runs:
     get:
-      summary: List recent agent runs
-      responses: { "200": { description: OK }, "401": { description: Unauthorized } }
+      summary: List up to 100 most recent runs
+      operationId: get_agent_runs
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runs:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          description: Authentication required
     post:
-      summary: Create an idempotent agent run
+      summary: Create a run or replay an existing key
+      operationId: post_agent_runs
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '400':
+          description: Invalid input
+        '200':
+          description: Idempotent replay
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run:
+                    type: object
+                    additionalProperties: true
+                  idempotentReplay:
+                    type: boolean
+      description: Queued on creation. Repeated idempotencyKey returns 200 and idempotentReplay=true;
+        other writes are not deduplicated by this key.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [agentName, taskType, idempotencyKey]
-              properties:
-                agentName: { type: string }
-                taskType: { type: string }
-                idempotencyKey: { type: string }
-                clientId: { type: integer }
-                input: { type: object }
-                sourceRefs: { type: array, items: { type: object } }
-                model: { type: string }
-                promptVersion: { type: string }
-      responses: { "201": { description: Created }, "400": { description: Invalid input }, "401": { description: Unauthorized } }
+              $ref: '#/components/schemas/RunInput'
+  /agent-runs/{id}:
+    patch:
+      summary: Update run status/output
+      operationId: patch_agent_runs_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
+      description: Terminal statuses set completedAt if not supplied. The local pricing saver only accepts
+        queued runs, so do not mark those runs running before invoking it.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunPatch'
   /context/clients/{id}:
     get:
-      summary: Get normalized client context for an agent
+      summary: Get client context for a worker
+      operationId: get_context_clients_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+                  meta:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '404':
+          description: Resource not found
       parameters:
-        - { name: id, in: path, required: true, schema: { type: integer } }
-      responses: { "200": { description: OK }, "404": { description: Not found } }
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
   /change-proposals:
     get:
-      summary: List change proposals
-      responses: { "200": { description: OK } }
+      summary: List up to 100 most recent proposals
+      operationId: get_change_proposals
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  proposals:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          description: Authentication required
     post:
-      summary: Propose a CRM mutation for review
+      summary: Record a proposed CRM change
+      operationId: post_change_proposals
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  proposal:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '400':
+          description: Invalid input
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposalInput'
+  /change-proposals/{id}:
+    patch:
+      summary: Approve/apply or reject a proposal
+      operationId: patch_change_proposals_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+                  applied:
+                    type: object
+                    additionalProperties: true
+        '401':
+          description: Authentication required
+        '400':
+          description: Invalid input
+        '404':
+          description: Resource not found
+        '409':
+          description: Conflict or already reviewed/approved
+        '422':
+          description: Unsupported proposal entity
+      description: Client create/update/archive only. Reviewer identity is credential-derived; reviewedBy
+        in the body is ignored. Row locking serializes review, and mutation plus review metadata commit
+        together. Rejection returns data only. currentSnapshot is not checked.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [agentRunId, entityType, operation, proposedData, reason]
               properties:
-                agentRunId: { type: integer }
-                entityType: { type: string }
-                entityId: { type: integer }
-                operation: { enum: [create, update, archive] }
-                proposedData: { type: object }
-                currentSnapshot: { type: object }
-                reason: { type: string }
-                confidence: { type: integer, minimum: 0, maximum: 100 }
-      responses: { "201": { description: Created }, "400": { description: Invalid input } }
+                action:
+                  type: string
+                  enum:
+                  - approve
+                  - reject
+              required:
+              - action
+  /search:
+    get:
+      summary: Get the flat client/deal/analysis search index
+      operationId: get_search
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          description: Authentication required
+      description: Returns up to 300 recent records. Search filtering is performed in the browser; q is
+        not used by this endpoint.
+  /suggestions:
+    get:
+      summary: Get grouped desk suggestions
+      operationId: get_suggestions
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  groups:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          description: Authentication required
+  /agent-status:
+    get:
+      summary: Get counts and state for the desk agent
+      operationId: get_agent_status
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          description: Authentication required
+      description: Returns a plain status object, not a data envelope.
+components:
+  securitySchemes:
+    AgentToken:
+      type: http
+      scheme: bearer
+      description: CRM_AGENT_API_TOKEN configured on the server; disabled when absent.
+    AdminSession:
+      type: apiKey
+      in: cookie
+      name: admin_session
+      description: Signed cookie created by the admin login server action.
+  schemas:
+    ClientInput:
+      type: object
+      properties:
+        name:
+          type: string
+        legalName:
+          type: string
+        clientType:
+          type: string
+        industry:
+          type: string
+        website:
+          type: string
+        source:
+          type: string
+        status:
+          type: string
+          enum:
+          - lead
+          - qualified
+          - active
+          - dormant
+          - archived
+        owner:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        summary:
+          type: string
+        notes:
+          type: string
+        nextAction:
+          type: string
+        nextActionAt:
+          type: string
+          format: date-time
+        contactName:
+          type: string
+        contactEmail:
+          type: string
+        contactPhone:
+          type: string
+        contactTitle:
+          type: string
+      required:
+      - name
+    ContactInput:
+      type: object
+      properties:
+        name:
+          type: string
+        title:
+          type: string
+        department:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        linkedinUrl:
+          type: string
+        isPrimary:
+          type: boolean
+        notes:
+          type: string
+      required:
+      - name
+    DealInput:
+      type: object
+      properties:
+        clientId:
+          type: integer
+        title:
+          type: string
+        stage:
+          type: string
+          enum:
+          - discovery
+          - analysis
+          - proposal
+          - negotiation
+          - won
+          - lost
+        value:
+          type:
+          - number
+          - string
+          - 'null'
+        currency:
+          type: string
+        probability:
+          type: integer
+          minimum: 0
+          maximum: 100
+        expectedCloseAt:
+          type: string
+          format: date-time
+        scope:
+          type: string
+        pricingNotes:
+          type: string
+        lostReason:
+          type: string
+      required:
+      - clientId
+      - title
+    ActivityInput:
+      type: object
+      properties:
+        clientId:
+          type: integer
+        dealId:
+          type: integer
+        type:
+          type: string
+        subject:
+          type: string
+        content:
+          type: string
+        source:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        completed:
+          type: boolean
+      required:
+      - clientId
+      - subject
+    AnalysisInput:
+      type: object
+      properties:
+        clientId:
+          type: integer
+        dealId:
+          type: integer
+        type:
+          type: string
+          enum:
+          - needs
+          - market
+          - pricing
+        title:
+          type: string
+        status:
+          type: string
+          enum:
+          - draft
+          - needs_review
+          - approved
+          - superseded
+          - rejected
+        summary:
+          type: string
+        findings:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              detail:
+                type: string
+            required:
+            - label
+            - detail
+        recommendations:
+          type: array
+          items:
+            type: string
+        evidence:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        confidence:
+          type: integer
+          minimum: 0
+          maximum: 100
+        createdBy:
+          type: string
+      required:
+      - clientId
+      - type
+      - title
+      description: Create as draft or needs_review. POST does not trigger approval effects; approve using
+        PATCH. Finding labels and evidence conventions are documented in analysis-schemas.md.
+    RunInput:
+      type: object
+      properties:
+        agentName:
+          type: string
+        taskType:
+          type: string
+        idempotencyKey:
+          type: string
+        clientId:
+          type: integer
+        input:
+          type: object
+          additionalProperties: true
+        sourceRefs:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        model:
+          type: string
+        promptVersion:
+          type: string
+      required:
+      - agentName
+      - taskType
+      - idempotencyKey
+    RunPatch:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - queued
+          - running
+          - completed
+          - failed
+          - cancelled
+        output:
+          type: object
+          additionalProperties: true
+        error:
+          type:
+          - string
+          - 'null'
+        analysisId:
+          type: integer
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+    ProposalInput:
+      type: object
+      properties:
+        agentRunId:
+          type: integer
+        entityType:
+          type: string
+        entityId:
+          type: integer
+        operation:
+          type: string
+          enum:
+          - create
+          - update
+          - archive
+        proposedData:
+          type: object
+          additionalProperties: true
+        currentSnapshot:
+          type: object
+          additionalProperties: true
+        reason:
+          type: string
+        confidence:
+          type: integer
+          minimum: 0
+          maximum: 100
+      required:
+      - agentRunId
+      - entityType
+      - operation
+      - proposedData
+      - reason
+      description: Automatic application supports entityType=client only. Include entityId for update/archive.
+        currentSnapshot is stored but is not a concurrency check.
+    ClientPatch:
+      type: object
+      properties:
+        name:
+          type: string
+        legalName:
+          type: string
+        clientType:
+          type: string
+        industry:
+          type: string
+        website:
+          type: string
+        source:
+          type: string
+        status:
+          type: string
+          enum:
+          - lead
+          - qualified
+          - active
+          - dormant
+          - archived
+        owner:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        summary:
+          type: string
+        notes:
+          type: string
+        nextAction:
+          type: string
+        nextActionAt:
+          type: string
+          format: date-time
+    ContactPatch:
+      type: object
+      properties:
+        name:
+          type: string
+        title:
+          type: string
+        department:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        linkedinUrl:
+          type: string
+        isPrimary:
+          type: boolean
+        notes:
+          type: string
+    DealPatch:
+      type: object
+      properties:
+        clientId:
+          type: integer
+        title:
+          type: string
+        stage:
+          type: string
+          enum:
+          - discovery
+          - analysis
+          - proposal
+          - negotiation
+          - won
+          - lost
+        value:
+          type:
+          - number
+          - string
+          - 'null'
+        currency:
+          type: string
+        probability:
+          type: integer
+          minimum: 0
+          maximum: 100
+        expectedCloseAt:
+          type: string
+          format: date-time
+        scope:
+          type: string
+        pricingNotes:
+          type: string
+        lostReason:
+          type: string
+    ActivityPatch:
+      type: object
+      properties:
+        clientId:
+          type: integer
+        dealId:
+          type: integer
+        type:
+          type: string
+        subject:
+          type: string
+        content:
+          type: string
+        source:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        completed:
+          type: boolean
+    AnalysisPatch:
+      type: object
+      properties:
+        title:
+          type: string
+        status:
+          type: string
+          enum:
+          - draft
+          - needs_review
+          - approved
+          - superseded
+          - rejected
+        summary:
+          type: string
+        findings:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              detail:
+                type: string
+            required:
+            - label
+            - detail
+        recommendations:
+          type: array
+          items:
+            type: string
+        evidence:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        confidence:
+          type: integer
+          minimum: 0
+          maximum: 100
+        createVersion:
+          type: boolean
+      description: createVersion creates a new draft and supersedes the original. Approval/rejection identity
+        is derived from credentials. Approved analyses reject ordinary edits with 409.
