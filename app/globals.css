@@ -1,0 +1,314 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-tc), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-tc), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-line: var(--line);
+  --color-signal: var(--signal);
+  --color-wash: var(--wash);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  color-scheme: light;
+
+  /*
+   * 藍圖：整站只有白與藍。色票取樣自 agent 原圖的筆觸 ——
+   * 最深 #010144、筆身 #03075b、中間淡彩 #a1b1e5、其餘純白。
+   * 紅色是唯一的例外，只給真正的錯誤，看不見的錯誤會出事。
+   */
+  --background: #ffffff;
+  --foreground: #0b1054;
+  --card: #ffffff;
+  --card-foreground: #0b1054;
+  --popover: #ffffff;
+  --popover-foreground: #0b1054;
+
+  /* 藍圖藍：連結、結構、CTA、進行中 */
+  --primary: #2f3db0;
+  --primary-foreground: #ffffff;
+
+  --secondary: #eef1fa;
+  --secondary-foreground: #0b1054;
+  --muted: #eef1fa;
+  --muted-foreground: #5a648f;
+  --accent: #eef1fa;
+  --accent-foreground: #0b1054;
+  --destructive: #c0392b;
+
+  --border: #dde2f2;
+  --input: #c9d1ea;
+  --ring: #2f3db0;
+
+  /* 自訂 */
+  --paper: #ffffff;
+  --ink: #0b1054;
+  --line: #c3cbe8;
+  /* 「完成」用更深的藍，靠深淺而非色相與進行中區分 */
+  --signal: #1b2570;
+  --wash: #a1b1e5;
+
+  --radius: 0.25rem;
+  --admin-panel: #ffffff;
+  --admin-panel-raised: #f4f6fc;
+}
+
+@layer utilities {
+  .admin-panel {
+    background: var(--admin-panel);
+    border: 1px solid var(--border);
+    /* On paper the lift comes from a blue-tinted shadow, not a black one. */
+    box-shadow: 0 10px 30px -18px rgb(11 16 84 / 0.22);
+  }
+  .admin-row {
+    transition: background-color 160ms ease, border-color 160ms ease;
+  }
+  .admin-row:hover {
+    background: color-mix(in oklab, var(--admin-panel-raised) 78%, transparent);
+  }
+  .decision-rail {
+    position: relative;
+  }
+  .decision-rail::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--border);
+  }
+  .admin-break {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+}
+
+@layer utilities {
+  /* 貫穿全頁的節點軸線 */
+  .axis-rail {
+    position: relative;
+  }
+  .axis-rail::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--line) 8%,
+      var(--line) 92%,
+      transparent
+    );
+  }
+
+  .noise-field {
+    background-image: radial-gradient(
+        circle at 20% 30%,
+        color-mix(in oklab, var(--primary) 14%, transparent),
+        transparent 55%
+      ),
+      radial-gradient(
+        circle at 78% 68%,
+        color-mix(in oklab, var(--wash) 40%, transparent),
+        transparent 52%
+      ),
+      linear-gradient(140deg, #f4f6fc, #ffffff);
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: reveal-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  }
+}
+
+@keyframes reveal-in {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 639px) {
+  main [data-slot='button'],
+  main [data-slot='input'],
+  main select {
+    min-height: 2.75rem;
+  }
+  main [data-slot='card'] {
+    border-radius: 0.5rem;
+  }
+}
+
+/* Desk agent: a slow sway so the portrait feels alive, and a soft cross-fade
+   when the expression changes. Both are disabled by the reduced-motion block
+   above, which sets animation-duration to ~0 globally. */
+@keyframes agent-sway {
+  0%,
+  100% {
+    transform: translateX(-2.5px) rotate(-0.6deg);
+  }
+  50% {
+    transform: translateX(2.5px) rotate(0.6deg);
+  }
+}
+
+@keyframes agent-face-in {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.agent-sway {
+  animation: agent-sway 4.5s ease-in-out infinite;
+}
+
+.agent-face-in {
+  animation: agent-face-in 500ms ease-out;
+}
+
+/* ---------------------------------------------------------------------------
+   Route transitions.
+
+   The desk agent carries the same view-transition-name on the home portrait
+   and on the top-bar avatar, so the browser morphs one element between the two
+   sizes instead of crossfading two separate ones. Everything else gets a short
+   rise-and-fade. All of it is off under reduced-motion.
+   ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 300ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-fill-mode: both;
+  }
+
+  /* Forward — stepping into a record: the page rises into place. */
+  :root[data-nav='forward'] ::view-transition-old(root) { animation-name: page-lift-out; }
+  :root[data-nav='forward'] ::view-transition-new(root) { animation-name: page-lift-in; }
+
+  /* Back — returning to the desk: the same move, reversed. */
+  :root[data-nav='back'] ::view-transition-old(root) { animation-name: page-drop-out; }
+  :root[data-nav='back'] ::view-transition-new(root) { animation-name: page-drop-in; }
+
+  /* Between two records: no vertical bias, just a settle. */
+  :root[data-nav='lateral'] ::view-transition-old(root) { animation-name: page-fade-out; }
+  :root[data-nav='lateral'] ::view-transition-new(root) { animation-name: page-fade-in; }
+
+  /* The portrait morphs on its own timing — slower, so it reads as the anchor. */
+  ::view-transition-group(desk-agent) {
+    animation-duration: 460ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  ::view-transition-old(desk-agent),
+  ::view-transition-new(desk-agent) {
+    /* No cross-fade: it is the same character, just a different size. */
+    animation: none;
+    mix-blend-mode: normal;
+    height: 100%;
+  }
+
+  .desk-agent-anchor {
+    view-transition-name: desk-agent;
+  }
+}
+
+@keyframes page-lift-out {
+  to { opacity: 0; transform: translateY(-10px) scale(0.995); }
+}
+@keyframes page-lift-in {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
+@keyframes page-drop-out {
+  to { opacity: 0; transform: translateY(14px) scale(0.995); }
+}
+@keyframes page-drop-in {
+  from { opacity: 0; transform: translateY(-10px); }
+}
+
+@keyframes page-fade-out {
+  to { opacity: 0; }
+}
+@keyframes page-fade-in {
+  from { opacity: 0; }
+}

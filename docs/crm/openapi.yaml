@@ -1,0 +1,59 @@
+openapi: 3.1.0
+info:
+  title: CRM Agent API
+  version: 1.0.0
+servers:
+  - url: /api/crm/v1
+paths:
+  /agent-runs:
+    get:
+      summary: List recent agent runs
+      responses: { "200": { description: OK }, "401": { description: Unauthorized } }
+    post:
+      summary: Create an idempotent agent run
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agentName, taskType, idempotencyKey]
+              properties:
+                agentName: { type: string }
+                taskType: { type: string }
+                idempotencyKey: { type: string }
+                clientId: { type: integer }
+                input: { type: object }
+                sourceRefs: { type: array, items: { type: object } }
+                model: { type: string }
+                promptVersion: { type: string }
+      responses: { "201": { description: Created }, "400": { description: Invalid input }, "401": { description: Unauthorized } }
+  /context/clients/{id}:
+    get:
+      summary: Get normalized client context for an agent
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses: { "200": { description: OK }, "404": { description: Not found } }
+  /change-proposals:
+    get:
+      summary: List change proposals
+      responses: { "200": { description: OK } }
+    post:
+      summary: Propose a CRM mutation for review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agentRunId, entityType, operation, proposedData, reason]
+              properties:
+                agentRunId: { type: integer }
+                entityType: { type: string }
+                entityId: { type: integer }
+                operation: { enum: [create, update, archive] }
+                proposedData: { type: object }
+                currentSnapshot: { type: object }
+                reason: { type: string }
+                confidence: { type: integer, minimum: 0, maximum: 100 }
+      responses: { "201": { description: Created }, "400": { description: Invalid input } }

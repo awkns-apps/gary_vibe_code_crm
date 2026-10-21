@@ -1,0 +1,12 @@
+{
+  "agentName": "contact-triage-agent",
+  "taskType": "contact_cleanup",
+  "idempotencyKey": "contact-triage-2026-07-27-batch-001",
+  "model": "model-name",
+  "promptVersion": "contact-triage-v1",
+  "input": { "contactMessageIds": [101, 102] },
+  "sourceRefs": [
+    { "kind": "contact_message", "id": "101" },
+    { "kind": "contact_message", "id": "102" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "agentRunId": 44,
+  "entityType": "client",
+  "operation": "create",
+  "proposedData": {
+    "name": "北辰科技",
+    "industry": "SaaS",
+    "status": "lead",
+    "tags": ["AI 自動化"]
+  },
+  "reason": "兩筆詢問使用相同公司網域且描述同一專案。",
+  "confidence": 91
+}
