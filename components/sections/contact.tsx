@@ -1,4 +1,4 @@
-import { Clock, Mail, MapPin } from 'lucide-react'
+import { Clock, MapPin } from 'lucide-react'
 import { AgentPortrait } from '@/components/agent-face'
 import { ContactForm } from '@/components/contact-form'
 import { Section } from '@/components/section'

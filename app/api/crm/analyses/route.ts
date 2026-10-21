@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const unauthorized = await requireApiAdmin()
+  const unauthorized = await requireApiAdmin(request)
   if (unauthorized) return unauthorized
   const body = await request.json()
   if (!body.clientId || !body.type || !String(body.title ?? "").trim()) {
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
 // Agent webhook: create an auditable run before another agent starts processing.
 export async function PUT(request: Request) {
-  const unauthorized = await requireApiAdmin()
+  const unauthorized = await requireApiAdmin(request)
   if (unauthorized) return unauthorized
   const body = await request.json()
   if (!body.agentName || !body.taskType || !body.idempotencyKey) {

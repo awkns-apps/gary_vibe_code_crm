@@ -9,9 +9,6 @@ const nextConfig = {
   async rewrites() {
     return [{ source: '/api/crm/v1/:path*', destination: '/api/crm/:path*' }]
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
     unoptimized: true,
   },

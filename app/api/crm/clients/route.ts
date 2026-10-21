@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const unauthorized = await requireApiAdmin()
+  const unauthorized = await requireApiAdmin(request)
   if (unauthorized) return unauthorized
 
   const body = await request.json()

@@ -4,14 +4,14 @@ import { db } from "@/lib/db"
 import { crmDeals } from "@/lib/db/schema"
 import { getAllDeals } from "@/lib/crm-data"
 
-export async function GET() {
-  const unauthorized = await requireApiAdmin()
+export async function GET(request: Request) {
+  const unauthorized = await requireApiAdmin(request)
   if (unauthorized) return unauthorized
   return NextResponse.json({ deals: await getAllDeals() })
 }
 
 export async function POST(request: Request) {
-  const unauthorized = await requireApiAdmin()
+  const unauthorized = await requireApiAdmin(request)
   if (unauthorized) return unauthorized
   const body = await request.json()
   if (!body.clientId || !String(body.title ?? "").trim()) {

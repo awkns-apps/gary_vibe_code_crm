@@ -468,15 +468,15 @@ export async function getSearchIndex(limit = 300): Promise<SearchItem[]> {
     c: string | null
   }>(sql`
     (select 'client' as kind, c.id as row_id, c.name as title,
-            c.industry as a, c.status as b, null as c, c.updated_at as sort_at
+            c.industry as a, c.status::text as b, null::text as c, c.updated_at as sort_at
        from crm_clients c where c.archived_at is null)
     union all
-    (select 'deal', d.id, d.title, cl.name, d.stage,
+    (select 'deal', d.id, d.title, cl.name, d.stage::text,
             case when d.value is null then null else d.currency || ' ' || trim(to_char(d.value, 'FM999,999,999,990')) end,
             d.updated_at
        from crm_deals d join crm_clients cl on cl.id = d.client_id)
     union all
-    (select 'analysis', an.id, an.title, cl2.name, an.type, an.status, an.updated_at
+    (select 'analysis', an.id, an.title, cl2.name, an.type::text, an.status::text, an.updated_at
        from crm_analyses an join crm_clients cl2 on cl2.id = an.client_id)
     order by sort_at desc
     limit ${limit}

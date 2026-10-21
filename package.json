@@ -1,12 +1,16 @@
 {
-  "name": "my-project",
+  "name": "gary-vibe-code-crm",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs",
+    "db:check": "node --env-file-if-exists=.env.local scripts/check-db.mjs",
+    "test:smoke": "node tests/smoke.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -42,5 +46,8 @@
       "hono": "4.12.25"
     }
   },
-  "packageManager": "pnpm@8.15.1+sha512.831cf4c5f8b8374af71521d4d153db49d7086de615c2af7cb5e9d7eb8ba630ddac46fea495d643e552ef2e68a3aa99a3e5e9fbee8696702967504df5c59cb273"
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22.9.0"
+  }
 }

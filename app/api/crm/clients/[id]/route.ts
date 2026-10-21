@@ -7,8 +7,8 @@ import { getCrmClient } from "@/lib/crm-data"
 
 type Context = { params: Promise<{ id: string }> }
 
-export async function GET(_: Request, { params }: Context) {
-  const unauthorized = await requireApiAdmin()
+export async function GET(request: Request, { params }: Context) {
+  const unauthorized = await requireApiAdmin(request)
   if (unauthorized) return unauthorized
   const id = Number((await params).id)
   const data = await getCrmClient(id)
@@ -18,7 +18,7 @@ export async function GET(_: Request, { params }: Context) {
 }
 
 export async function PATCH(request: Request, { params }: Context) {
-  const unauthorized = await requireApiAdmin()
+  const unauthorized = await requireApiAdmin(request)
   if (unauthorized) return unauthorized
   const id = Number((await params).id)
   const body = await request.json()
@@ -43,8 +43,8 @@ export async function PATCH(request: Request, { params }: Context) {
   return client ? NextResponse.json({ client }) : NextResponse.json({ error: "Not found" }, { status: 404 })
 }
 
-export async function DELETE(_: Request, { params }: Context) {
-  const unauthorized = await requireApiAdmin()
+export async function DELETE(request: Request, { params }: Context) {
+  const unauthorized = await requireApiAdmin(request)
   if (unauthorized) return unauthorized
   const id = Number((await params).id)
   const [client] = await db.update(crmClients).set({
